@@ -1,0 +1,18 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+environment:
+  MSBLOC_JWT:
+    secure: i0c7f4jPiKNc+wAh7tqA3uL46NoXfolL+DyrJpLZsWFgHIp0MwS8GEgqCI1D0amtH/bR7CfXZMyPYIXFN11w+y9owVCluAJSEsVIFzY5e1MCa+k/Z5DyMMHo9InbaytVnbNltSZUStF4wXadvCxROva/D6oYxWxpISTecrU3RNdivWm7ZfNBiQz/U/phGfYpEIvZHqdxNlsvmbguvN2d65AMH4B9We3w1/nzbA8DQbcWNKyQ8hL6B7HuQvkOmTyx8wd3m7h41cHytZWHusCJ0E9CNpcHKHpp7d5cHpncc/08ZDnMW0GBieXP0FIxdbEnmuqmq+Mng4NX4kO+Am34aih7AJRiGTyqJ7M/E8mWK1tqHcyWy30+MDlypndEwN0nrJ/0x6ht817I6QXJp3Yx4VfFxBeig/jPa5aa5o2dTfNgPYpDq/u3TT0f3K0XGVO+rP7bzh5EOKkgZGAr51WyKoiLUlaMeeVE4Y70+jbZkFEP26y2Us9wm172REA0KglqVpcBPLwmbwiyqrHdqG/+uyU+EAVCcH3PMkJcMhnKy2BA36O9cknXBuAhepXrmF0Y7yMRiHQGp6bv9Lrw3++ItUwHZEdhZPW2WEA93DUg793flqklL6xXItNYuOBIqRteDvopBxySsvNUvlE2JmuVowY1t5ooS8sNcwrLZbDTnQFJynrQgAa9VLBsp4H/YSZ3
+build_script:
+   - ps: nuget restore src\ClassLibrary1.sln
+   - ps: msbuild src\ClassLibrary1.sln --% /bl:output.binlog
+artifacts:
+- path: output.binlog
+  type: File   
+on_finish:
+   - ps: >-
+       if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER)
+       {
+           Import-Module .\MSBuildLogOctokitChecker.psm1
+           Send-MsbuildLogAppveyor -Path output.binlog -Token $env:MSBLOC_JWT
+       }
